@@ -1,0 +1,65 @@
+{# перекрытие штатного layout: свой стиль без темы + ссылка на пользовательскую часть #}
+{# sqladmin_original указывает на оригинальный шаблон пакета #}
+{% extends "sqladmin_original/layout.html" %}
+
+{% block head_tail %}
+<style>
+  /* админка в стиле сайта: белый фон, обычный текст, без градиентов и теней */
+  html, body, .page-wrapper {
+    background: #fff !important;
+  }
+
+  /* боковая панель была тёмной с градиентом — делаем белой с тонкой рамкой */
+  aside.navbar-vertical,
+  aside.navbar-vertical .navbar,
+  aside.navbar-vertical nav {
+    background: transparent !important;
+    background-image: none !important;
+  }
+  aside.navbar-vertical {
+    background: #fff !important;
+    border-right: 1px solid #d8d8d8 !important;
+    box-shadow: none !important;
+  }
+  aside.navbar-vertical h1,
+  aside.navbar-vertical h3,
+  aside.navbar-vertical a,
+  aside.navbar-vertical .nav-link,
+  aside.navbar-vertical button {
+    color: #222 !important;
+  }
+  aside.navbar-vertical .nav-link:hover,
+  aside.navbar-vertical .nav-link.active {
+    background: #f0f0f0 !important;
+    color: #000 !important;
+  }
+  aside.navbar-vertical .btn {
+    border: 1px solid #bbb !important;
+    background: #fff !important;
+  }
+  aside.navbar-vertical .navbar-brand h3 {
+    font-weight: normal;
+  }
+
+  /* карточки и таблицы: плоские, с простой рамкой */
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #d8d8d8 !important;
+    border-radius: 3px !important;
+  }
+  .page-header, .page-body {
+    box-shadow: none !important;
+  }
+  .btn-icon svg, .btn-icon i {
+    color: inherit;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+<a href="{{ admin.site_url }}" class="btn btn-secondary btn-icon position-fixed bottom-0 start-0 m-3">
+  <i class="fa fa-arrow-left me-2"></i>
+  <span>вернуться на сайт</span>
+</a>
+{% endblock %}

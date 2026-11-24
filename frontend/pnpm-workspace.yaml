@@ -1,0 +1,5 @@
+# esbuild нужен для vitest, его postinstall собирает бинарник
+allowBuilds:
+  esbuild: true
+overrides:
+  postcss: ">=8.5.23"

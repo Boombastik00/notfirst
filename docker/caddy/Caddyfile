@@ -1,0 +1,21 @@
+# единая точка входа: сам получает сертификат и держит https
+# домен и email приходят из переменных окружения compose
+
+{$DOMAIN} {
+	encode gzip
+
+	# api и админка идут напрямую в api чтобы sqladmin видел настоящий
+	# домен в заголовке host и собирал правильные ссылки
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+
+	handle /admin/* {
+		reverse_proxy api:8000
+	}
+
+	# всё остальное — сайт
+	handle {
+		reverse_proxy web:3000
+	}
+}

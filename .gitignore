@@ -1,0 +1,30 @@
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# node
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+
+# окружение
+.env
+.env.*
+!.env.example
+
+# разное
+.DS_Store
+
+# артефакты тестов и сборок
+coverage/
+test-results/
+playwright-report/
+dist/
+*.log
+
+# редактор
+.vscode/

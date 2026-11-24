@@ -1,0 +1,14 @@
+[project]
+name = "notfirst-e2e"
+version = "0.1.0"
+description = "e2e-тесты сайта не первая на playwright"
+requires-python = ">=3.11"
+dependencies = [
+    "playwright>=1.49",
+    "pytest>=8",
+    "asyncpg>=0.30",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+addopts = "-q"

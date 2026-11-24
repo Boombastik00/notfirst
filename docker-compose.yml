@@ -1,0 +1,62 @@
+services:
+  db:
+    image: postgres:16-alpine
+    # пароль не секретный только для локальной разработки
+    environment:
+      POSTGRES_USER: notfirst
+      POSTGRES_PASSWORD: notfirst
+      POSTGRES_DB: notfirst
+    # слушаем только на этой машине: база с дев-паролем не должна быть видна из сети
+    ports:
+      - "127.0.0.1:5432:5432"
+    # контейнер не должен уметь поднимать себе привилегии
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notfirst"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      APP_ENV: local
+      DATABASE_URL: postgresql+asyncpg://notfirst:notfirst@db:5432/notfirst
+      BASE_URL: http://localhost:3000
+      # заполни значениями из google cloud console чтобы заработал вход
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      SESSION_COOKIE_SECRET: ${SESSION_COOKIE_SECRET:-dev-insecure-change-me}
+      ADMIN_GOOGLE_SUBS: ${ADMIN_GOOGLE_SUBS:-}
+    # api открыт наружу только для localhost: админку в dev открывают напрямую
+    ports:
+      - "127.0.0.1:8000:8000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      # прокси адрес и публичный адрес сайта запекаются при сборке образа, см Dockerfile
+      args:
+        BACKEND_ORIGIN: http://api:8000
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    ports:
+      - "127.0.0.1:3000:3000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      - api
+
+volumes:
+  db_data:
