@@ -13,6 +13,9 @@ class PublicProfileOut(BaseModel):
     avatar_url: str | None = None
     badges: list[BadgeOut] = []
     is_banned: bool = False
+    # дополнительная информация видна всем только если заполнена
+    current_field: str | None = None
+    bio: str | None = None
 
 
 class PublicStoryCard(BaseModel):

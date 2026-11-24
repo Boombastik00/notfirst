@@ -4,6 +4,8 @@
 export interface LegalSection {
   h: string;
   p: string[];
+  // необязательные внешние ссылки (например каналы проекта)
+  links?: { text: string; url: string }[];
 }
 
 export interface LegalDoc {
@@ -322,6 +324,17 @@ export const LEGAL_DOCS: LegalDoc[] = [
         h: "сроки ответа",
         p: [
           "стараемся отвечать в течение 10 рабочих дней.",
+        ],
+      },
+      {
+        h: "мы в сети",
+        p: [
+          "исходный код платформы открыт: github.com/Boombastik00/notfirst",
+          "телеграм-канал проекта: t.me/youarenotfirst",
+        ],
+        links: [
+          { text: "github.com/Boombastik00/notfirst", url: "https://github.com/Boombastik00/notfirst" },
+          { text: "t.me/youarenotfirst", url: "https://t.me/youarenotfirst" },
         ],
       },
     ],

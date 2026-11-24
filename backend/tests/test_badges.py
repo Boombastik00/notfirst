@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import select
 
-from app.models import Story, User
+from app.models import Story, Tag, TagGroup, User
 from app.models.enums import UserRole
 
 pytestmark = pytest.mark.asyncio
@@ -44,6 +44,30 @@ async def test_public_profile_and_stories(api_client, db_session, fake_google):
     uid = await _user_id(db_session, "sub-bdg-1")
 
     profile = (await api_client.get(f"/api/v1/u/{uid}")).json()
+    # дополнительная информация: заполняем и проверяем видимость
+    field_id = (
+        await db_session.execute(
+            select(Tag.id).join(TagGroup).where(TagGroup.code == "fields").limit(1)
+        )
+    ).scalar_one_or_none()
+    assert field_id, "в словаре нет тегов сфер"
+    profile_resp = await api_client.patch(
+        "/api/v1/profile",
+        json={"bio": "я инженер и люблю разбираться в железе", "current_field_tag_id": field_id},
+    )
+    assert profile_resp.status_code == 200
+
+    profile = (await api_client.get(f"/api/v1/u/{uid}")).json()
+    assert profile["current_field"] is not None
+    assert "инженер" in profile["bio"]
+
+    # у пользователяницы без сферы и био полей нет
+    await _login(api_client, fake_google, "sub-bdg-1b", "bdg1b@example.com")
+    uid_b = await _user_id(db_session, "sub-bdg-1b")
+    profile_b = (await api_client.get(f"/api/v1/u/{uid_b}")).json()
+    assert profile_b["current_field"] is None
+    assert profile_b["bio"] is None
+
     # имя из google или почта — любое из них допустимо
     assert profile["display_name"] in {"bdg1@example.com", "Тестовая Пользовательница"}
     assert profile["badges"] == []

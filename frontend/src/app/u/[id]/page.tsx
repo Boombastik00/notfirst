@@ -20,6 +20,8 @@ interface PublicProfile {
   avatar_url: string | null;
   badges: Badge[];
   is_banned: boolean;
+  current_field: string | null;
+  bio: string | null;
 }
 
 interface PublicStoryCard {
@@ -129,6 +131,14 @@ export default async function PublicProfilePage({
         ) : null}
 
         {profile.is_banned ? <p>аккаунт заблокирован</p> : null}
+
+        {profile.current_field || profile.bio ? (
+          <section>
+            <h2>дополнительная информация</h2>
+            {profile.current_field ? <p>сфера деятельности: {profile.current_field}</p> : null}
+            {profile.bio ? <p>о себе: {profile.bio}</p> : null}
+          </section>
+        ) : null}
 
         {isStaff && catalog ? (
           <StaffPanel

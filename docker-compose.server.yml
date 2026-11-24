@@ -1,0 +1,71 @@
+# продовое окружение на сервере: образы уже загружены (notfirst-api:prod / notfirst-web:prod)
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: notfirst
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env.prod}
+      POSTGRES_DB: notfirst
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notfirst"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    image: notfirst-api:prod
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+asyncpg://notfirst:${POSTGRES_PASSWORD}@db:5432/notfirst
+      BASE_URL: https://${DOMAIN:?задайте DOMAIN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      SESSION_COOKIE_SECRET: ${SESSION_COOKIE_SECRET:?задайте SESSION_COOKIE_SECRET в .env.prod}
+      ADMIN_GOOGLE_SUBS: ${ADMIN_GOOGLE_SUBS:-}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: notfirst-web:prod
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?задайте DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?задайте ACME_EMAIL}
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - web
+      - api
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:

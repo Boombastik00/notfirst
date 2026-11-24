@@ -31,6 +31,17 @@ export default async function LegalDocPage({ params }: { params: Promise<{ doc: 
             {section.p.map((paragraph, i) => (
               <p key={i}>{paragraph}</p>
             ))}
+            {section.links?.length ? (
+              <ul>
+                {section.links.map((link) => (
+                  <li key={link.url}>
+                    <a href={link.url} target="_blank" rel="noopener noreferrer">
+                      {link.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </section>
         ))}
         <p>

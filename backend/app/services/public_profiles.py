@@ -64,6 +64,12 @@ async def public_profile(db: AsyncSession, user_id: UUID) -> dict | None:
         return None
     profile = await db.get(UserProfile, user_id)
 
+    # сфера деятельности — название тега, показываем только если указана сама
+    field_name = None
+    if profile is not None and profile.current_field_tag_id is not None:
+        tag = await db.get(Tag, profile.current_field_tag_id)
+        field_name = tag.name_ru if tag else None
+
     badge_rows = (
         await db.execute(select(UserBadge.badge).where(UserBadge.user_id == user_id))
     ).scalars().all()
@@ -79,6 +85,8 @@ async def public_profile(db: AsyncSession, user_id: UUID) -> dict | None:
             if code in BADGES
         ],
         "is_banned": user.is_banned,
+        "current_field": field_name,
+        "bio": profile.bio if profile else None,
     }
 
 
